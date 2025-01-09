@@ -17,6 +17,10 @@ public class Play2Players extends JFrame {
     public static int colPreSelected = -1;
     public static int rowPreDiLai;
     public static int colPreDiLai;
+    private int winsPlayer1 = 0;
+    private int winsPlayer2 = 0;
+    private int losesPlayer1=0;
+    private int losesPlayer2=0;
     public static  int ROWS = 3;
     public static  int COLS = 3;
     public static String Player1Name;
@@ -31,7 +35,13 @@ public class Play2Players extends JFrame {
     public static  int CELL_PADDING = CELL_SIZE / 6;
     public static  int SYMBOL_SIZE = CELL_SIZE - CELL_PADDING * 2;
     public static  int SYMBOL_STROKE_WIDTH = 8;
+
+    private Image player1Avatar;
+    private Image player2Avatar;
     // Các trạng thái trong game
+    private Image loadImage(String path) {
+        return new ImageIcon(path).getImage();
+    }
     public enum GameState {
         PLAYING, DRAW, CROSS_WON, NOUGHT_WON
     }
@@ -62,100 +72,141 @@ public class Play2Players extends JFrame {
         CELL_PADDING = CELL_SIZE / 6;
         SYMBOL_SIZE = CELL_SIZE - CELL_PADDING * 2;
     }
+
+
     protected void PlayGame(String name1, String name2){
-        SetUpBoard(newRow);
-        Player1Name = name1;
-        Player2Name = name2;
-        canvas = new DrawCanvas();  // Construct a drawing canvas (a JPanel)
-        canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
-        // The canvas (JPanel) fires a MouseEvent upon mouse-click
-        canvas.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
-                int mouseX = e.getX();
-                int mouseY = e.getY();
-                // vị trí ô được chọn (X hoặc 0 tương ứng)
-                int rowSelected = mouseY / CELL_SIZE;
-                int colSelected = mouseX / CELL_SIZE;
-                if (currentState == GameState.PLAYING) {
-                    if (rowSelected >= 0 && rowSelected < ROWS && colSelected >= 0
-                            && colSelected < COLS && board[rowSelected][colSelected] == Seed.EMPTY) {
-                        rowPreSelected = rowSelected;
-                        colPreSelected = colSelected;
-                        board[rowSelected][colSelected] = currentPlayer; // tạo nước đi
-                        updateGame(currentPlayer, rowSelected, colSelected); // cập nhật trạng thái
-                        // đổi người chơi
-                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-                        STEPS++;
+        try {
+            player1Avatar = loadImage("D:\\gomoku\\Caro_java\\FinalSource\\TicTacToe\\TicTacToe\\.idea\\Screenshot\\1736341500149.jpg"); // Thay đổi đường dẫn
+            player2Avatar = loadImage("D:\\gomoku\\Caro_java\\FinalSource\\TicTacToe\\TicTacToe\\.idea\\Screenshot\\mèo thần tài.jpg"); // Thay đổi đường dẫn
+            SetUpBoard(newRow);
+            Player1Name = name1;
+            Player2Name = name2;
+            canvas = new DrawCanvas();  // Construct a drawing canvas (a JPanel)
+            canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
+            // The canvas (JPanel) fires a MouseEvent upon mouse-click
+            canvas.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
+                    int mouseX = e.getX();
+                    int mouseY = e.getY();
+                    // vị trí ô được chọn (X hoặc 0 tương ứng)
+                    int rowSelected = mouseY / CELL_SIZE;
+                    int colSelected = mouseX / CELL_SIZE;
+                    if (currentState == GameState.PLAYING) {
+                        if (rowSelected >= 0 && rowSelected < ROWS && colSelected >= 0
+                                && colSelected < COLS && board[rowSelected][colSelected] == Seed.EMPTY) {
+                            rowPreSelected = rowSelected;
+                            colPreSelected = colSelected;
+                            board[rowSelected][colSelected] = currentPlayer; // tạo nước đi
+                            updateGame(currentPlayer, rowSelected, colSelected); // cập nhật trạng thái
+                            // đổi người chơi
+                            currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+                            STEPS++;
+                        }
+                        btnDiLai.setEnabled(true);
+                        btnBoDiLai.setEnabled(false);
+                    } else {       // game over
+                        initGame(); // restart the game
                     }
-                    btnDiLai.setEnabled(true);
-                    btnBoDiLai.setEnabled(false);
-                } else {       // game over
-                    initGame(); // restart the game
+                    repaint();  // Call-back paintComponent().
                 }
-                repaint();  // Call-back paintComponent().
-            }
-        });
+            });
 
-        // tạo thanh trạng thái thông báo
-        statusBar = new JLabel("  ");
-        statusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
-        statusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));
+            // tạo thanh trạng thái thông báo
+            statusBar = new JLabel("  ");
+            statusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
+            statusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));
 
-        //Thêm Button
-        btnDiLai = new Button("Đi lại");
-        btnDiLai.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
-        btnDiLai.setEnabled(false);
-        btnDiLai.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(currentState != GameState.PLAYING) return;
-                if(STEPS==0) return;
-                rowPreDiLai =rowPreSelected;
-                colPreDiLai =colPreSelected;
-                PlayerReRun = board[rowPreSelected][colPreSelected];
-                currentPlayer = PlayerReRun;
-                board[rowPreSelected][colPreSelected] = Seed.EMPTY;
-                btnBoDiLai.setEnabled(true);
-                btnDiLai.setEnabled(false);
-                repaint();
-            }
-        });
-        btnBoDiLai = new Button("Bỏ đi lại");
-        btnBoDiLai.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
-        btnBoDiLai.setEnabled(false);
-        btnBoDiLai.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(currentState != GameState.PLAYING) return;
-                if(STEPS == 0 || PlayerReRun == null ) return;
-                board[rowPreDiLai][colPreDiLai] = PlayerReRun;
-                currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-                btnBoDiLai.setEnabled(false);
-                repaint();
-            }
-        });
-        pnButton = new JPanel();
-        pnButton.setLayout(new FlowLayout(FlowLayout.CENTER));
-        pnButton.add(btnDiLai);
-        pnButton.add(btnBoDiLai);
-        Container cp = getContentPane();
-        cp.setLayout(new BorderLayout());
-        cp.add(canvas, BorderLayout.CENTER);
-        cp.add(statusBar, BorderLayout.PAGE_END);
-        cp.add(pnButton, BorderLayout.PAGE_START);
-        pack();
-        setTitle("Tic Tac Toe 2 người");
-        setLocationRelativeTo(null);
-        setVisible(true);  //JFrame
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                jFrame.setVisible(true);
-            }
-        });
-        board = new Seed[ROWS][COLS];
-        initGame(); // khởi tạo các components
+            //Thêm Button
+            btnDiLai = new Button("Đi lại");
+            btnDiLai.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
+            btnDiLai.setEnabled(false);
+            btnDiLai.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (currentState != GameState.PLAYING) return;
+                    if (STEPS == 0) return;
+                    rowPreDiLai = rowPreSelected;
+                    colPreDiLai = colPreSelected;
+                    PlayerReRun = board[rowPreSelected][colPreSelected];
+                    currentPlayer = PlayerReRun;
+                    board[rowPreSelected][colPreSelected] = Seed.EMPTY;
+                    btnBoDiLai.setEnabled(true);
+                    btnDiLai.setEnabled(false);
+                    repaint();
+                }
+            });
+            btnBoDiLai = new Button("Bỏ đi lại");
+            btnBoDiLai.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
+            btnBoDiLai.setEnabled(false);
+            btnBoDiLai.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (currentState != GameState.PLAYING) return;
+                    if (STEPS == 0 || PlayerReRun == null) return;
+                    board[rowPreDiLai][colPreDiLai] = PlayerReRun;
+                    currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+                    btnBoDiLai.setEnabled(false);
+                    repaint();
+                }
+            });
+            pnButton = new JPanel();
+            pnButton.setLayout(new FlowLayout(FlowLayout.CENTER));
+            pnButton.add(btnDiLai);
+            pnButton.add(btnBoDiLai);
+            winsPlayer1 = GetAndSetHighScore.getWin(Player1Name);
+            losesPlayer1 = GetAndSetHighScore.getLose(Player1Name);
+            winsPlayer2 = GetAndSetHighScore.getWin(Player2Name);
+            losesPlayer2 = GetAndSetHighScore.getLose(Player2Name);
+            JPanel playerInfoPanel = new JPanel();
+            playerInfoPanel.setLayout(new GridLayout(2, 2));
+            playerInfoPanel.setLayout(new BoxLayout(playerInfoPanel, BoxLayout.Y_AXIS));
+
+            JLabel player1Label = new JLabel("Người chơi 1: " + Player1Name);
+            JLabel player1wins = new JLabel("Thắng: "+ winsPlayer1);
+            JLabel player1loses = new JLabel("Thua: "+ losesPlayer1);
+            JLabel player2Label = new JLabel("Người chơi 2: " + Player2Name);
+            JLabel player2wins = new JLabel("Thắng: "+ winsPlayer2);
+            JLabel player2loses = new JLabel("Thua: "+ losesPlayer2);
+            // Tạo JLabel với ảnh đã chỉnh kích cỡ
+            ImageIcon player1Icon = new ImageIcon(player1Avatar);
+            Image player1Image = player1Icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Kích thước 100x100
+            JLabel player1AvatarLabel = new JLabel(new ImageIcon(player1Image));
+
+            ImageIcon player2Icon = new ImageIcon(player2Avatar);
+            Image player2Image = player2Icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Kích thước 100x100
+            JLabel player2AvatarLabel = new JLabel(new ImageIcon(player2Image));
+
+            playerInfoPanel.add(player1AvatarLabel);
+            playerInfoPanel.add(player1Label);
+            playerInfoPanel.add(player1wins);
+            playerInfoPanel.add(player1loses);
+            playerInfoPanel.add(player2AvatarLabel);
+            playerInfoPanel.add(player2Label);
+            playerInfoPanel.add(player2wins);
+            playerInfoPanel.add(player2loses);
+
+            Container cp = getContentPane();
+            cp.setLayout(new BorderLayout());
+            cp.add(canvas, BorderLayout.CENTER);
+            cp.add(playerInfoPanel, BorderLayout.EAST);
+            cp.add(statusBar, BorderLayout.PAGE_END);
+            cp.add(pnButton, BorderLayout.PAGE_START);
+            pack();
+            setTitle("Tic Tac Toe 2 người");
+            setLocationRelativeTo(null);
+            setVisible(true);  //JFrame
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    jFrame.setVisible(true);
+                }
+            });
+            board = new Seed[ROWS][COLS];
+            initGame();
+        }catch(Exception e){
+            e.printStackTrace(); // khởi tạo các components
+        }
     }
     /** Initialize the game-board contents and the status */
     public void initGame() {
@@ -177,6 +228,7 @@ public class Play2Players extends JFrame {
             currentState = (theSeed == Seed.CROSS) ? GameState.CROSS_WON : GameState.NOUGHT_WON;
             if(theSeed == Seed.CROSS){
                 try {
+                    winsPlayer1++;
                     GetAndSetHighScore.ghiFile(GetAndSetHighScore.FILE_NAME,Player1Name,Player2Name);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -185,6 +237,7 @@ public class Play2Players extends JFrame {
             }
             else {
                     try {
+                        winsPlayer2++;
                         GetAndSetHighScore.ghiFile(GetAndSetHighScore.FILE_NAME,Player2Name,Player1Name);
                     } catch (Exception e) {
                         e.printStackTrace();

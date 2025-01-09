@@ -94,7 +94,7 @@ public class PlayWithAI extends Play2Players{
 
                         board[rowSelected][colSelected] = currentPlayer; // Make a move
                         updateGame(currentPlayer, rowSelected, colSelected); // update state
-                        // Switch player
+                        // đổi người chơi
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                      }
                   }
@@ -109,25 +109,20 @@ public class PlayWithAI extends Play2Players{
             repaint();  // Call-back paintComponent().
          }
       });
-
       addWindowListener(new WindowAdapter() {
          @Override
          public void windowClosing(WindowEvent e) {
             jFrame.setVisible(true);
          }
       });
-
       // Setup the status bar (JLabel) to display status message
       statusBar = new JLabel("  ");
       statusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
       statusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));
-
       //Thêm Button
       btnDiLai = new Button("Đi lại");
       btnDiLai.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
       btnDiLai.setEnabled(false);
-      //btnDiLai.setSize(10,10);
-
       btnDiLai.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
@@ -169,11 +164,15 @@ public class PlayWithAI extends Play2Players{
       pnButton.setLayout(new FlowLayout(FlowLayout.CENTER));
       pnButton.add(btnDiLai);
       pnButton.add(btnBoDiLai);
+      JPanel playerInfoPanel = new JPanel();
+      playerInfoPanel.setLayout(new BoxLayout(playerInfoPanel, BoxLayout.Y_AXIS));
 
-
+      JLabel player1Label = new JLabel("Người chơi 1: " + Player1Name);
+      playerInfoPanel.add(player1Label);
       Container cp = getContentPane();
       cp.setLayout(new BorderLayout());
       cp.add(canvas, BorderLayout.CENTER);
+      cp.add(playerInfoPanel, BorderLayout.EAST);
       cp.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
       cp.add(pnButton, BorderLayout.PAGE_START);
 
@@ -188,12 +187,9 @@ public class PlayWithAI extends Play2Players{
 
    // Bot theo thuật toán Heuristic
    public static class HeuristicBot {
-      // dong, cot = nxn
-      // bot, player = kiểu enum theo platform tictactoe
       // mangTC = điểm TC tính theo số lần xuất hiện của bản thân (bot)
       // mangPT = điểm PT tính theo số lần xuất hiện của người chơi (player)
       // board = mang kiểu enum theo platform
-      //
       static int dong, cot;
       static Seed bot;
       static Seed player; // kiểu của bot, người chơi, test với int, có thể thay lại thành enum
@@ -209,7 +205,6 @@ public class PlayWithAI extends Play2Players{
       }
       // hàm test lấy ngẫu nhiên
       // test với console
-
       // Main Clas, get Point when user check in board
       // thay đổi cái int[][] board thành enum board
       public static String getPoint(Seed[][] board){
@@ -222,7 +217,6 @@ public class PlayWithAI extends Play2Players{
          for (int i = 0; i < dong; i++){
             for (int ii = 0; ii < cot; ii++)
             {
-
                if (board[i][ii] == Seed.EMPTY) {
                   checkTC = CheckDoc(ii, i, board, bot) + CheckNgang(ii, i, board, bot) + CheckCheoPhai(i, ii, board, bot) + CheckCheoTrai(i, ii, board, bot);
                   checkPT = PTDoc(ii, i, board, player) + PTNgang(ii, i, board, player) + PTPhai(i, ii, board, player) + PTTrai(i, ii, board, player);
@@ -237,22 +231,13 @@ public class PlayWithAI extends Play2Players{
                      vTri = i + " " + ii;
                      list.add(vTri);
                   }
-
                }
-
-
             }
-
-
          }
          Random rand = new Random();
          String s = list.get(rand.nextInt(list.size()));
-
          return s;
       }
-      //Tấn công
-      // -> -> -> -> -> -> [i][n++]
-      // int pos => vị trí hiện tại, int rowNow => dòng hiện tại
       public static long CheckNgang(int pos, int rowNow, Seed[][] board, Seed type){
          int ta = 0; int count = 0; int dich = 0;
          boolean flag = false;

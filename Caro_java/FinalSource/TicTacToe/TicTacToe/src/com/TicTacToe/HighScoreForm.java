@@ -1,5 +1,4 @@
 package com.TicTacToe;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import static com.TicTacToe.JFrameMain.jFrame;
-
 public class HighScoreForm extends JFrame {
-
     private JTable tblHighScore;
     private JPanel panel1;
     private DefaultTableModel model;
@@ -30,16 +27,12 @@ public class HighScoreForm extends JFrame {
                     jFrame.setVisible(true);
                 }
             });
-
-
             model = new DefaultTableModel();
             Vector column = new Vector();
             column.add("Tên người chơi");
             column.add("Thắng");
             column.add("Thua");
             model.setColumnIdentifiers(column);
-
-
             ArrayList<String> listPlayers = new ArrayList<>();
         try {
             listPlayers = GetAndSetHighScore.getAll(GetAndSetHighScore.FILE_NAME);
